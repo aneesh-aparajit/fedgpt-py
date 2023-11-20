@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "federated"
+version = "0.1.0"
+description = "A simple server-client architecture for \"Federated Learning\"."
+authors = ["aneesh-aparajit <aneeshaparajit.g2002@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+flwr = "^1.5.0"
+transformers = "^4.35.2"
+torch = "^2.1.1"
+numpy = "^1.26.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
