@@ -45,7 +45,7 @@ class GptClient(fl.client.Client):
         self.optimizer = optimizer
     
     def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
-        logging.info(f"[Client {self.cid}] get_parameters")
+        logging.info(f"[Client {self.cid}] get_parameters, config: {ins.config}")
         # get the paramaters of the networl
         ndarrays: List[np.ndarray] = get_parameters(self.net)
         # serialize the ndarrys to parameter object
@@ -62,7 +62,7 @@ class GptClient(fl.client.Client):
 
         # update the local model
         set_parameters(net=self.net, parameters=ndarrays)
-        optimizer = self.optimizer()
+        optimizer = self.optimizer(self.net.parameters(), lr=3e-4)
         train(
             model=self.net, 
             optim=optimizer, 

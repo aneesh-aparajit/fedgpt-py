@@ -2,6 +2,7 @@ from typing import List
 import torch
 from torch.utils.data import Dataset, DataLoader, random_split
 import string
+import glob
 
 vocab = ["<s>", "</s>", "<pad>"] + sorted(list(string.ascii_letters + "1234567890 '&\\+-\"/@#{}=%.?|!><*_()[]`^,"))
 ix2ch = {ix:ch for ix,ch in enumerate(vocab)}
@@ -64,14 +65,14 @@ def collate_fn(batch):
 
 
 def load_datasets(num_clients: int):
-    trainset = GptDataset(texts=[])
-    testset = GptDataset(texts=[])
+    train_sentences, test_sentences = load_sentences()
+    trainset = GptDataset(texts=train_sentences)
+    testset = GptDataset(texts=test_sentences)
 
     # Split training set into `num_clients` partitions to simulate different local datasets
     partition_size = len(trainset) // num_clients
     lengths = [partition_size] * num_clients
-    datasets = random_split(
-        trainset, lengths=lengths, generator=torch.Generator().manual_seed(42))
+    datasets = random_split(trainset, lengths=lengths, generator=torch.Generator().manual_seed(42))
     
     # Split each partition into train/val and create DataLoader
     trainloaders = []
@@ -85,5 +86,28 @@ def load_datasets(num_clients: int):
         )
         trainloaders.append(DataLoader(ds_train, batch_size=32, shuffle=True))
         validloaders.append(DataLoader(ds_val, batch_size=32))
-    testloader = DataLoader(testloader, batch_size=32)
+    testloader = DataLoader(testset, batch_size=32)
     return trainloaders, validloaders, testloader
+
+
+def load_sentences():
+    global vocab
+    files = glob.glob(pathname="../data/legal/*.txt")
+    sentences = []
+    for file in files:
+        lines = open(file=file, mode='r').readlines()
+        sentences.extend([x.strip() for x in lines])
+    
+    print(f"Total: {len(sentences)}")
+
+    vocab = ['<s>', '</s>', '<pad>'] + list(set("".join(sentences)))
+
+    train_lengths = int(len(sentences) * 0.9)
+
+    train_sentences = sentences[:train_lengths]
+    test_sentences  = sentences[train_lengths:]
+
+    train_sentences = sorted(train_sentences, key=lambda x: len(x))
+    test_sentences  = sorted(test_sentences, key=lambda x: len(x))
+
+    return train_sentences, test_sentences
