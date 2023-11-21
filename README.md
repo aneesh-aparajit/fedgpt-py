@@ -18,3 +18,39 @@ cd client/
 docker build -t federated-client .
 docker run -it -p 8080:8080 federated-client:latest
 ```
+
+## File Structure
+```
+.
+├── README.md
+├── client
+│   ├── Dockerfile
+│   ├── __init__.py
+│   ├── client.py
+│   ├── main.py
+│   ├── models
+│   │   ├── __init__.py
+│   │   ├── dataset.py
+│   │   ├── engine.py
+│   │   └── gpt.py
+│   ├── run-client.sh
+│   └── utils.py
+├── poetry.lock
+├── pyproject.toml
+└── server
+    ├── Dockerfile
+    ├── __init__.py
+    ├── main.py
+    ├── model.pth
+    ├── models
+    │   ├── __init__.py
+    │   ├── dataset.py
+    │   ├── engine.py
+    │   └── gpt.py
+    ├── requirements.txt
+    ├── run-server.sh
+    ├── strategy.py
+    └── utils.py
+
+5 directories, 25 files
+```

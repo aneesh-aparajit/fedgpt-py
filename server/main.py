@@ -1,3 +1,4 @@
+from __future__ import annotations
 from argparse import ArgumentParser
 import flwr as fl
 import torch.nn.functional as F
@@ -31,10 +32,10 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
     _, _, testloader = load_datasets(num_clients=args.min_available_clients)
-    
+
     strategy = FedAvgWithWeightSaving(
         fraction_fit=args.fraction_fit,
-        fraction_evaluate=args.fraction_evalute,
+        fraction_evaluate=args.fraction_evaluate,
         min_fit_clients=args.min_fit_clients,
         min_available_clients=args.min_available_clients,
         min_evaluate_clients=args.min_evaluate_clients,

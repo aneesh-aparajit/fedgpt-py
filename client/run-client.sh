@@ -7,10 +7,10 @@ SERVER_ADDR="[::]:8080"
 NUM_CLIENTS=2
 
 echo "Starting $NUM_CLIENTS clients."
-for ((i = 0; i < $NUM_CLIENTSl; i++))
+for ((i=0; i < $NUM_CLIENTSl; i++))
 do
     echo "Starting client(cid=$i) with partition $i out of $NUM_CLIENTS clients."
-    python -m client.main \
+    python -m main \
         --cid=$i \
         --server_addr=$SERVER_ADDR \
         --nb_clients=$NUM_CLIENTS &

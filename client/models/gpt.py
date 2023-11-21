@@ -1,3 +1,4 @@
+from __future__ import annotations
 import math
 from dataclasses import dataclass
 
@@ -5,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from dataset import vocab
+from models.dataset import vocab
 
 # ---------------------------------- Config ---------------------------------- #
 @dataclass
@@ -118,7 +119,6 @@ class PositionalEncoding(nn.Module):
         pos_encodings = self.positional_encodings[: x.shape[1]]
         return self.dropout(pos_encodings + x)
 
-
 # ------------------------------ NanoGPT Module ------------------------------ #
 class NanoGpt(nn.Module):
     def __init__(
@@ -154,7 +154,7 @@ class NanoGpt(nn.Module):
         )
         self.ln = nn.LayerNorm((n_embed,))
         self.lm_head = nn.Sequential(
-            nn.Linear(n_embed, n_embed // 2), nn.GELU(), nn.Linear(n_embed, vocab_size)
+            nn.Linear(n_embed, n_embed // 2), nn.GELU(), nn.Linear(n_embed // 2, vocab_size)
         )
 
     def forward(

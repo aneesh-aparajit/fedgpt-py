@@ -1,3 +1,4 @@
+from __future__ import annotations
 import os
 from typing import Callable, Optional, List, Tuple, Dict, Union
 
@@ -21,7 +22,7 @@ from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
 
-from models.gpt import NanoGpt
+from models.gpt import NanoGpt, GptConfig
 from utils import get_parameters, set_parameters
 
 DEVICE = torch.device("cuda:0" if torch.backends.cuda.is_built() else "cpu")
@@ -67,7 +68,13 @@ class FedAvgWithWeightSaving(fl.server.strategy.Strategy):
     
     def initialize_parameters(self, client_manager: ClientManager) -> Parameters | None:
         """Initialize the global model parameters"""
-        net = NanoGpt()
+        net = NanoGpt(
+            vocab_size=GptConfig.vocab_size,
+            n_embed=GptConfig.n_embed,
+            n_heads=GptConfig.n_head,
+            buffer_size=GptConfig.buffer_size,
+            n_blocks=GptConfig.n_layers,
+        )
 
         if not os.path.exists(self.checkpoint_path):
             # check if checkpoints are found, else randomly initialize the model and populate global checkpoint.
@@ -104,7 +111,13 @@ class FedAvgWithWeightSaving(fl.server.strategy.Strategy):
 
         # load the model
         parameters_ndarrays = parameters_to_ndarrays(parameters=parameters)
-        net = NanoGpt()
+        net = NanoGpt(
+            vocab_size=GptConfig.vocab_size,
+            n_embed=GptConfig.n_embed,
+            n_heads=GptConfig.n_head,
+            buffer_size=GptConfig.buffer_size,
+            n_blocks=GptConfig.n_layers,
+        )
         set_parameters(net=net, parameters=parameters_ndarrays)
         net = net.to(DEVICE)
         logging.info(msg=f"[Server Round: {server_round}], Loading global model parameters on the model.")
@@ -194,7 +207,7 @@ class FedAvgWithWeightSaving(fl.server.strategy.Strategy):
         
         return parameters_aggregated, metrics_aggregated
     
-    def aggregate_evalute(
+    def aggregate_evaluate(
         self, server_round: int, results: List[Tuple[ClientProxy, EvaluateRes]],
         failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]]
     ) -> Tuple[Optional[float], Dict[str, Scalar]]:
