@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Start Flower server
-python -m server.main \
+python -m main \
     --server_address="[::]:8080" \
     --num_rounds=3 \
     --fraction_fit=1.0 \

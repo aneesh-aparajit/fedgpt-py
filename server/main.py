@@ -10,6 +10,8 @@ from utils import (
     evaluate_metrics_aggregation_fn
 )
 
+from models.dataset import load_datasets
+
 def parse_args():
     parser = ArgumentParser()
 
@@ -27,10 +29,9 @@ def parse_args():
     return parser.parse_args()
 
 if __name__ == '__main__':
-    testloader = None
-
     args = parse_args()
-
+    _, _, testloader = load_datasets(num_clients=args.min_available_clients)
+    
     strategy = FedAvgWithWeightSaving(
         fraction_fit=args.fraction_fit,
         fraction_evaluate=args.fraction_evalute,
