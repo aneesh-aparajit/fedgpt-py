@@ -98,16 +98,16 @@ class FedAvgWithWeightSaving(fl.server.strategy.Strategy):
         if not self.do_global_eval:
             return None
         
+        if self.dataloader is None:
+            logging.warn(msg=f"Centralized DataLoader not found. Restart server with the dataset, if centralized validation is to be performed.")
+            return None
+
         # load the model
         parameters_ndarrays = parameters_to_ndarrays(parameters=parameters)
         net = NanoGpt()
         set_parameters(net=net, parameters=parameters_ndarrays)
         net = net.to(DEVICE)
         logging.info(msg=f"[Server Round: {server_round}], Loading global model parameters on the model.")
-
-        if self.dataloader is None:
-            logging.warn(msg=f"Centralized DataLoader not found. Restart server with the dataset, if centralized validation is to be performed.")
-            return None
 
         # run the evaluation process on the centralized server.
         running_loss, dataset_size = 0, 0
