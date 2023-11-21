@@ -21,7 +21,7 @@ def train(
     dataset_size, running_loss = 0, 0
     for step, batch in pbar:
         batch = {k: v.to(device) for k, v in batch.items()}
-        batch_size = batch["input_ids"].shape
+        batch_size = batch["input_ids"].shape[0]
 
         optim.zero_grad()
 
@@ -30,7 +30,7 @@ def train(
 
         scalar.scale(loss).backward()
         scalar.step(optimizer=optim)
-        scalar.step()
+
         if scheduler is not None:
             scheduler.step()
 
@@ -50,7 +50,7 @@ def test(model: NanoGpt, dataloader: DataLoader, device: str):
     dataset_size, running_loss = 0, 0
     for step, batch in pbar:
         batch = {k: v.to(device) for k, v in batch.items()}
-        batch_size = batch["input_ids"].shape
+        batch_size = batch["input_ids"].shape[0]
 
         with amp.autocast_mode.autocast():
             _, loss = model.forward(**batch)
