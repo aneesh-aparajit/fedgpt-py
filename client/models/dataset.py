@@ -85,16 +85,18 @@ def collate_fn(batch):
     return res
 
 
-def load_datasets(num_clients: int):
+def load_datasets(num_clients: int, batch_size: int):
     train_sentences, test_sentences = load_sentences()
+    train_sentences = train_sentences[:350]
     trainset = GptDataset(texts=train_sentences)
     testset = GptDataset(texts=test_sentences)
 
-    # Split training set into `num_clients` partitions to simulate different local datasets
     partition_size = len(trainset) // num_clients
     lengths = [partition_size] * num_clients
-    datasets = random_split(trainset, lengths=lengths, generator=torch.Generator().manual_seed(42))
-    
+    print(lengths)
+    datasets = random_split(
+        trainset, lengths=lengths, generator=torch.Generator().manual_seed(42))
+
     # Split each partition into train/val and create DataLoader
     trainloaders = []
     validloaders = []
@@ -102,14 +104,14 @@ def load_datasets(num_clients: int):
         len_val = len(ds) // 10
         len_train = len(ds) - len_val
         lengths = [len_train, len_val]
+        print(lengths)
         ds_train, ds_val = random_split(
             ds, lengths=lengths, generator=torch.Generator().manual_seed(42)
         )
-        trainloaders.append(DataLoader(ds_train, batch_size=32, shuffle=True, collate_fn=collate_fn))
-        validloaders.append(DataLoader(ds_val, batch_size=32, collate_fn=collate_fn))
-    testloader = DataLoader(testset, batch_size=32, collate_fn=collate_fn)
+        trainloaders.append(DataLoader(ds_train, batch_size=batch_size, shuffle=True, collate_fn=collate_fn))
+        validloaders.append(DataLoader(ds_val, batch_size=batch_size, collate_fn=collate_fn))
+    testloader = DataLoader(testset, batch_size=batch_size, collate_fn=collate_fn)
     return trainloaders, validloaders, testloader
-
 
 def load_sentences():
     global vocab

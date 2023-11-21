@@ -26,7 +26,7 @@ def train(
         optim.zero_grad()
 
         with amp.autocast_mode.autocast():
-            _, loss = model.forward()
+            _, loss = model.forward(**batch)
 
         scalar.scale(loss).backward()
         scalar.step(optimizer=optim)
@@ -53,7 +53,7 @@ def test(model: NanoGpt, dataloader: DataLoader, device: str):
         batch_size = batch["input_ids"].shape
 
         with amp.autocast_mode.autocast():
-            _, loss = model.forward()
+            _, loss = model.forward(**batch)
 
         running_loss += loss.item() * batch_size
         dataset_size += batch_size
