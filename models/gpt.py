@@ -9,7 +9,7 @@ from dataset import vocab
 
 # ---------------------------------- Config ---------------------------------- #
 @dataclass
-class GPTConfig:
+class GptConfig:
     buffer_size: int = 512
     vocab_size: int = len(vocab)  # GPT2 has a total of 50257, padded to nearest multiple of 64 for efficiency
     n_layers: int = 6
@@ -30,11 +30,11 @@ class Attention(nn.Module):
     '''
     def __init__(self, n_embed: int, head_size: int) -> None:
         super().__init__()
-        self.Q = nn.Linear(n_embed, head_size, bias=GPTConfig.bias)
-        self.K = nn.Linear(n_embed, head_size, bias=GPTConfig.bias)
-        self.V = nn.Linear(n_embed, head_size, bias=GPTConfig.bias)
+        self.Q = nn.Linear(n_embed, head_size, bias=GptConfig.bias)
+        self.K = nn.Linear(n_embed, head_size, bias=GptConfig.bias)
+        self.V = nn.Linear(n_embed, head_size, bias=GptConfig.bias)
         tril = torch.tril(
-            torch.ones(size=(GPTConfig.buffer_size, GPTConfig.buffer_size))
+            torch.ones(size=(GptConfig.buffer_size, GptConfig.buffer_size))
         )
         self.register_buffer("tril", tril)
 
@@ -60,8 +60,8 @@ class MultiHeadAttention(nn.Module):
         self.heads = nn.ModuleList(
             [Attention(n_embed=n_embed, head_size=head_size) for _ in range(n_heads)]
         )
-        self.proj = nn.Linear(n_embed, n_embed, bias=GPTConfig.bias)
-        self.dropout = nn.Dropout(p=GPTConfig.dropout)
+        self.proj = nn.Linear(n_embed, n_embed, bias=GptConfig.bias)
+        self.dropout = nn.Dropout(p=GptConfig.dropout)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = torch.cat([h(x) for h in self.heads], dim=-1) # (B, T, C) -> (B, T, C//N_HEADS) -> (B, T, C)
@@ -112,7 +112,7 @@ class PositionalEncoding(nn.Module):
 
         self.register_buffer("positional_encodings", positional_encodings)
 
-        self.dropout = nn.Dropout(p=GPTConfig.dropout)
+        self.dropout = nn.Dropout(p=GptConfig.dropout)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         pos_encodings = self.positional_encodings[: x.shape[1]]
@@ -140,13 +140,13 @@ class NanoGpt(nn.Module):
             num_embeddings=vocab_size, embedding_dim=n_embed
         )
 
-        if GPTConfig.use_sinusoidal:
+        if GptConfig.use_sinusoidal:
             self.positional_encodings = PositionalEncoding(
-                n_embed=n_embed, max_seq_len=GPTConfig.buffer_size
+                n_embed=n_embed, max_seq_len=GptConfig.buffer_size
             )
         else:
             self.positional_encodings = nn.Embedding(
-                num_embeddings=GPTConfig.buffer_size, embedding_dim=n_embed
+                num_embeddings=GptConfig.buffer_size, embedding_dim=n_embed
             )
 
         self.blocks = nn.Sequential(
@@ -162,7 +162,7 @@ class NanoGpt(nn.Module):
     ) -> torch.Tensor:
         B, T = input_ids.shape
         tok_emb = self.token_embeddings(input_ids) # (B, T, C)
-        if GPTConfig.use_sinusoidal:
+        if GptConfig.use_sinusoidal:
             x = self.positional_encodings.forward(tok_emb) # (B, T, C) -> (B, T, C)
         else:
             x = tok_emb + self.positional_encodings(
@@ -183,7 +183,7 @@ class NanoGpt(nn.Module):
         self, ids: torch.Tensor, max_len: int, temperature: float = 0.7
     ) -> int:
         for _ in range(max_len):
-            ids_cond = ids[:, -GPTConfig.buffer_size :]
+            ids_cond = ids[:, -GptConfig.buffer_size :]
             logits, _ = self.forward(input_ids=ids_cond, labels=None)
             logit = logits[:, -1, :]
             probs = F.softmax(logit, dim=-1)
@@ -199,11 +199,11 @@ class NanoGpt(nn.Module):
 
 if __name__ == "__main__":
     model = NanoGpt(
-        vocab_size=GPTConfig.vocab_size,
-        n_embed=GPTConfig.n_embed,
-        n_heads=GPTConfig.n_head,
-        buffer_size=GPTConfig.buffer_size,
-        n_blocks=GPTConfig.n_layers,
+        vocab_size=GptConfig.vocab_size,
+        n_embed=GptConfig.n_embed,
+        n_heads=GptConfig.n_head,
+        buffer_size=GptConfig.buffer_size,
+        n_blocks=GptConfig.n_layers,
     )
 
     print(model)

@@ -10,7 +10,7 @@ encode = lambda s: [ch2ix[c] for c in s]
 decode = lambda l: ''.join([ix2ch[i] for i in l])
 
 
-class NanoGptDataset(Dataset):
+class GptDataset(Dataset):
     def __init__(self, texts: List[str]) -> None:
         super().__init__()
         self.texts = texts
@@ -64,8 +64,8 @@ def collate_fn(batch):
 
 
 def load_datasets(num_clients: int):
-    trainset = NanoGptDataset(texts=[])
-    testset = NanoGptDataset(texts=[])
+    trainset = GptDataset(texts=[])
+    testset = GptDataset(texts=[])
 
     # Split training set into `num_clients` partitions to simulate different local datasets
     partition_size = len(trainset) // num_clients
