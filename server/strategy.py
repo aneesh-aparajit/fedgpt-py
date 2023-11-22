@@ -21,6 +21,7 @@ from flwr.common import (
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
+from tqdm import tqdm
 
 from models.gpt import NanoGpt, GptConfig
 from utils import get_parameters, set_parameters
@@ -125,7 +126,7 @@ class FedAvgWithWeightSaving(fl.server.strategy.Strategy):
         # run the evaluation process on the centralized server.
         running_loss, dataset_size = 0, 0
         with torch.no_grad():
-            for batch in self.dataloader:
+            for batch in tqdm(self.dataloader):
                 batch = {k:v.to(DEVICE) for k,v in batch.items()}
                 _, loss = net.forward(**batch)
                 bs = batch['labels'].size(0)

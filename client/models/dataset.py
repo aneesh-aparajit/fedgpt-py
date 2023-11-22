@@ -87,7 +87,8 @@ def collate_fn(batch):
 
 def load_datasets(num_clients: int, batch_size: int):
     train_sentences, test_sentences = load_sentences()
-    train_sentences = train_sentences[:350]
+    train_len = (len(train_sentences) // num_clients) * num_clients
+    train_sentences = train_sentences[:train_len]
     trainset = GptDataset(texts=train_sentences)
     testset = GptDataset(texts=test_sentences)
 
@@ -114,7 +115,6 @@ def load_datasets(num_clients: int, batch_size: int):
     return trainloaders, validloaders, testloader
 
 def load_sentences():
-    global vocab
     files = glob.glob(pathname="../data/legal/*.txt")
     sentences = []
     for file in files:
