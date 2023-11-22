@@ -54,3 +54,6 @@ docker run -it -p 8080:8080 federated-client:latest
 
 5 directories, 25 files
 ```
+
+## Run
+![run](assets/image.png)
